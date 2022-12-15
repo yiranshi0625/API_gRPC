@@ -1,0 +1,52 @@
+//python -m grpc_tools.protoc -I ./protos --python_out=./service --pyi_out=./service --grpc_python_out=./service ./protos/greeting.proto
+syntax = "proto3";
+
+message Book {
+  string ISBN = 1;
+  string title = 2;
+  string author = 3;
+  Genre genre = 4;
+  int32 publishing_year = 5;
+}
+
+enum Genre{
+    HISTORICAL = 0;
+    ADVENTURE = 1;
+    ROMANCE = 2;
+}
+
+enum Status{
+    AVAILABLE = 0;
+    TAKEN = 1;
+}
+
+message InventoryItem {
+  int32 inventory_number = 1;
+  oneof objects {
+    Book book = 2;
+  }
+  Status status = 3;
+}
+
+service InventoryService {
+    // Create a book
+    rpc CreateBook(CreateRequest) returns (CreateResponse) {};
+    // Get a book - given ISBN, retrieve book details
+    rpc GetBook(GetRequest) returns (Book) {};
+}
+
+message CreateRequest {
+  string ISBN = 1;
+  string title = 2;
+  string author = 3;
+  Genre genre = 4;
+  int32 publishing_year = 5;
+}
+
+message CreateResponse {
+    int32 success = 1;
+}
+
+message GetRequest {
+  string ISBN = 1;
+}
