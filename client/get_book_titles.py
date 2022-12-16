@@ -1,5 +1,6 @@
 from inventory_client import InventoryClient
 
+
 # returns the list of titles with the given list of ISBNs
 def GetTitles(client, ISBNs):
     titles = []

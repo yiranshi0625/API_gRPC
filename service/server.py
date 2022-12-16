@@ -4,6 +4,7 @@ import grpc
 from concurrent import futures
 import logging
 
+
 class InventoryService(greeting_pb2_grpc.InventoryServiceServicer):
     # hardcode book database
     books = [
@@ -12,14 +13,14 @@ class InventoryService(greeting_pb2_grpc.InventoryServiceServicer):
             "title": "Gone with the Wind",
             "author": "Margaret Mitchell",
             "genre": greeting_pb2.ROMANCE,
-            "publishing_year": 1936,
+            "publishing_year": 1936
         },
         {
             "ISBN": "2",
             "title": "Tale of Two Cities",
             "author": "Charles Dickens",
             "genre": greeting_pb2.HISTORICAL,
-            "publishing_year": 1859,
+            "publishing_year": 1859
         },
     ]
 
@@ -45,6 +46,7 @@ class InventoryService(greeting_pb2_grpc.InventoryServiceServicer):
         # no book with given ISBN exists
         return greeting_pb2.GetResponse(book={"ISBN": "-1", "title": "", "author": "", "genre": greeting_pb2.UNKNOWN,
                                               "publishing_year": -1})
+
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
