@@ -1,53 +1,29 @@
-from unittest import mock
 import unittest
+from unittest.mock import MagicMock
 from get_book_titles import GetTitles
-import get_book_titles
 from inventory_client import InventoryClient
+import greeting_pb2
 
 
-class Reply:
-    def __init__(self, book):
-        self.book = book
+class Test(unittest.TestCase):
+    # Mock testing GetTitles in get_book_titles.py using Mock (w/o running server)
+    def test_get_book_mock(self):
+        example_book = greeting_pb2.Book(ISBN="1", title="Robinson Crusoe", author="Daniel Defoe",
+                                         genre=greeting_pb2.ADVENTURE, publishing_year=1719)
+        # mock object of InventoryClient
+        client_mock = InventoryClient("mock", 00000)
+        client_mock.GetTitle = MagicMock(return_value=greeting_pb2.GetResponse(book=example_book))
+        titles = GetTitles(client_mock, ["1"])
+        assert (titles == ["Robinson Crusoe"])
 
-
-class Book:
-    def __init__(self, isbn, title):
-        self.isbn = isbn
-        self.title = title
-
-
-# mocked return result
-mockReplyBook1 = Reply(Book("1", "book1"))
-mockReplyNotExistRes = Reply(Book("-1", ""))
-
-
-class Test_get_book_titles(unittest.TestCase):
-    def test_01(self):
-        '''get book title success'''
-        print("get book title success mock test")
-        # mock client api, each time return book1 as result
-        client = InventoryClient("localhost", "50051")
-        client.get_book = mock.Mock(return_value=mockReplyBook1)
-        # get book titles based on mock result
-        book_title_list = GetTitles(client, ["1", "2", "3"])
-        print("whatever")
-        print(book_title_list)
-        self.assertEqual(len(book_title_list), 3)
-        self.assertEqual(book_title_list[0], "book1")
-        self.assertEqual(book_title_list[1], "book1")
-        self.assertEqual(book_title_list[2], "book1")
-
-    def test_02(self):
-        '''get book title fail'''
-        print("get book title fail mock test")
-        # mock client api, each time return book1 as result
-        # get book titles based on mock result
-        client = InventoryClient("localhost", "50051")
-        client.get_book = mock.Mock(return_value=mockReplyNotExistRes)
-        # if the book does not exist, should not include its title
-        book_title_list = GetTitles(client, ["not exist1", "not exist2"])
-        print(book_title_list)
-        self.assertEqual(len(book_title_list), 0)
+    # Testing GetTitles in get_book_titles.py using a live server to access the API
+    def test_get_book_live_server(self):
+        client = InventoryClient("localhost", 10086)
+        # create a new book, adding to the existing book database
+        client.CreateBook(ISBN="3", title="Jane Eyre", author="Charlotte Brontë",
+                          genre=greeting_pb2.ROMANCE, publishing_year=1847)
+        titles = GetTitles(client, ["1", "3"])
+        assert (titles == ["Gone with the Wind", "Jane Eyre"])
 
 
 if __name__ == "__main__":
