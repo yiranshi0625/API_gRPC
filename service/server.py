@@ -4,22 +4,21 @@ import grpc
 from concurrent import futures
 import logging
 
-
 class InventoryService(greeting_pb2_grpc.InventoryServiceServicer):
     # hardcode book database
     books = [
         {
-            "ISBN": 1,
+            "ISBN": "1",
             "title": "Gone with the Wind",
             "author": "Margaret Mitchell",
-            "genre": 2,
+            "genre": greeting_pb2.ROMANCE,
             "publishing_year": 1936,
         },
         {
-            "ISBN": 2,
+            "ISBN": "2",
             "title": "Tale of Two Cities",
             "author": "Charles Dickens",
-            "genre": 0,
+            "genre": greeting_pb2.HISTORICAL,
             "publishing_year": 1859,
         },
     ]
@@ -39,19 +38,18 @@ class InventoryService(greeting_pb2_grpc.InventoryServiceServicer):
 
     # Retrieves a book's detail with input ISBN
     def GetBook(self, request, context):
-        for book in self.books:
-            if book['ISBN'] == request.ISBN:
+        for get in self.books:
+            if get['ISBN'] == request.ISBN:
                 # found the book
-                return greeting_pb2.Book(ISBN=book['ISBN'], title=book['title'], author=book['author'],
-                                         genre=book['genre'], publishing_year=book['publishing_year'])
+                return greeting_pb2.GetResponse(book=get)
         # no book with given ISBN exists
-        return greeting_pb2.Book(ISBN="-1", title="", author="", genre=[], publishing_year=-1)
-
+        return greeting_pb2.GetResponse(book={"ISBN": "-1", "title": "", "author": "", "genre": greeting_pb2.UNKNOWN,
+                                              "publishing_year": -1})
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     greeting_pb2_grpc.add_InventoryServiceServicer_to_server(InventoryService(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('[::]:10086')
     server.start()
     server.wait_for_termination()
 
